@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>GestorExcursiones.Application</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../GestorExcursiones.Domain/GestorExcursiones.Domain.csproj" />
+    <ProjectReference Include="../GestorExcursiones.Infrastructure/GestorExcursiones.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

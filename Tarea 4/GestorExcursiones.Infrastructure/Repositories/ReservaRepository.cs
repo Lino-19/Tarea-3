@@ -1,0 +1,3 @@
+using GestorExcursiones.Domain.Entities;using GestorExcursiones.Infrastructure.Context;using GestorExcursiones.Infrastructure.Core;using Microsoft.EntityFrameworkCore;
+namespace GestorExcursiones.Infrastructure.Repositories;
+public class ReservaRepository(ApplicationDbContext c):BaseRepository<Reserva>(c){public Task<List<Reserva>> GetConDetallesAsync()=>_context.Reservas.AsNoTracking().Include(x=>x.Cliente).Include(x=>x.Excursion).OrderByDescending(x=>x.FechaReserva).ToListAsync();public Task<Reserva?> GetConDetalleAsync(int id)=>_context.Reservas.AsNoTracking().Include(x=>x.Cliente).Include(x=>x.Excursion).FirstOrDefaultAsync(x=>x.Id==id);}

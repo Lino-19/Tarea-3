@@ -1,0 +1,10 @@
+using GestorExcursiones.Domain.Entities;using GestorExcursiones.Infrastructure.Repositories;using Microsoft.AspNetCore.Mvc;
+namespace GestorExcursiones.API.Controllers;
+public record ReservaCreateDto(int ClienteId,int ExcursionId,int CantidadParticipantes,decimal MontoPagado);
+public record ReservaPagoDto(decimal MontoPagado);
+[ApiController][Route("api/[controller]")] public class ReservationsController(ReservaRepository reservas,ClienteRepository clientes,ExcursionRepository excursiones):ControllerBase{
+ [HttpGet] public async Task<IActionResult> GetAll()=>Ok(await reservas.GetConDetallesAsync());
+ [HttpGet("{id:int}")] public async Task<IActionResult> GetById(int id){var x=await reservas.GetConDetalleAsync(id);return x is null?NotFound():Ok(x);}
+ [HttpPost] public async Task<IActionResult> Create(ReservaCreateDto d){if(d.CantidadParticipantes<1||d.MontoPagado<0)return BadRequest("Cantidad o pago inválido.");if(await clientes.GetByIdAsync(d.ClienteId) is null)return BadRequest("El cliente no existe.");var e=await excursiones.GetByIdAsync(d.ExcursionId);if(e is null)return BadRequest("La excursión no existe.");if(e.Fecha<DateTime.Today)return BadRequest("La excursión ya pasó.");if(d.CantidadParticipantes>e.MaxParticipantes)return BadRequest("Se supera la capacidad máxima.");var total=e.Precio*d.CantidadParticipantes;if(d.MontoPagado>total)return BadRequest("El pago supera el total.");var x=new Reserva{ClienteId=d.ClienteId,ExcursionId=d.ExcursionId,CantidadParticipantes=d.CantidadParticipantes,MontoTotal=total,MontoPagado=d.MontoPagado,FechaReserva=DateTime.Now};await reservas.AddAsync(x);return CreatedAtAction(nameof(GetById),new{id=x.Id},x);}
+ [HttpPatch("{id:int}/pago")] public async Task<IActionResult> Pago(int id,ReservaPagoDto d){var x=await reservas.GetByIdAsync(id);if(x is null)return NotFound();if(d.MontoPagado<0||d.MontoPagado>x.MontoTotal)return BadRequest("Pago fuera del rango permitido.");x.MontoPagado=d.MontoPagado;await reservas.UpdateAsync(x);return NoContent();}
+ [HttpDelete("{id:int}")] public async Task<IActionResult> Delete(int id)=>await reservas.DeleteAsync(id)?NoContent():NotFound();}
